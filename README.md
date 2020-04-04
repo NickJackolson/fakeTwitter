@@ -6,14 +6,14 @@ A fake twitter app. Runs Vue on frontend and Golang on backend. It has almost no
 ### Starting with GO backend
 GO [compiler](https://golang.org "compiler") must be installed and all backend files should be in your systems GOPATH which usually is located at `C:/Users/"YourUsername"/go/`
 Make sure your GO PATH directory structure looks like this:
-
-- ├───bin
-- ├───pkg
-- └───src
-- └───github.com
-- -        └───"YourGithubUsername"
-- -            └───BackendFolder  (Should include main.go and data.db)
-
+```
+ ├───bin
+ ├───pkg
+ └───src
+ └───github.com
+     └───"YourGithubUsername"
+          └───BackendFolder  (Should include main.go and data.db)
+```
 
 Before starting up the backend make sure you have installed:
 "jwt-go"," handlers", "mux" and "go-sqlite3". 
