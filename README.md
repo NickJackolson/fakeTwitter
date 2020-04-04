@@ -1,5 +1,7 @@
 # FakeTwitter
 A fake twitter app. Runs Vue on frontend and Golang on backend. It has almost no styling and code may sometimes differ from best-practice methods.
+![Image of LoginPage](https://github.com/NickJackolson/fakeTwitter/blob/master/pictures/fakeTwitter1.png)
+![Image of RegisterPage](https://github.com/NickJackolson/fakeTwitter/blob/master/pictures/fakeTwitter2.png)
 
 
 ## How to run
