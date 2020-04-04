@@ -1,7 +1,6 @@
 <template>
 <div class="postArticle">
     <form class="box" @submit="addArticle">
-        <h3>Create A Post</h3>
         <input type="text" v-model='title' name="title" placeholder="Title">
         <input type="text" v-model='content' name="content" placeholder="What's on your mind?">
         <input type="submit" value="Submit">
