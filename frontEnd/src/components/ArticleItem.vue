@@ -1,6 +1,6 @@
 <template>
   <div class="article-item">
-      <p>-{{article.author}}</p>
+      <p>@{{article.author}}</p>
       <p>{{article.pdate}}</p>
       <p>{{article.title}}</p>
       <p>{{article.content}}</p>

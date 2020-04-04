@@ -23,6 +23,7 @@ type User struct {
 	Email    string `json:"email"`
 }
 
+// Response given back to frontend after login
 type Response struct {
 	Username string
 	Token    string
@@ -136,12 +137,12 @@ func getAllArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var articleList []Article
 	var instance Article
-	reqToken := r.Header.Get("token")
-	if reqToken == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode("Unauthorized access!")
-		return
-	}
+	// reqToken := r.Header.Get("token")
+	// if reqToken == "" {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	_ = json.NewEncoder(w).Encode("Unauthorized access!")
+	// 	return
+	// }
 	// user := r.Header.Get("user")
 	// token, err := jwt.Parse(reqToken, "secretKey")
 	// if err != nil {
@@ -271,10 +272,11 @@ func createEmptyDB() {
 		}
 		statement.Exec()
 
-		statement, err = db.Prepare("CREATE TABLE IF NOT EXISTS article (id INTEGER PRIMARY KEY, title NVARCHAR(50), content NVARCHAR(50), ptime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, author NVARCHAR(50)")
+		statement, err = db.Prepare("CREATE TABLE article (id INTEGER PRIMARY KEY, title NVARCHAR(50), content NVARCHAR(50), ptime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, author NVARCHAR(50))")
 
 		if err != nil {
 			fmt.Println("Error2 at article creation")
+			log.Fatal(err)
 			return
 		}
 		statement.Exec()
