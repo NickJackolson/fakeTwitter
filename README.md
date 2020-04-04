@@ -1,0 +1,39 @@
+# FakeTwitter
+A fake twitter app. Runs Vue on frontend and Golang on backend. It has almost no styling and code may sometimes differ from best-practice methods.
+
+
+## How to run
+### Starting with GO backend
+GO [compiler](https://golang.org "compiler") must be installed and all backend files should be in your systems GOPATH which usually is located at `C:/Users/"YourUsername"/go/`
+Make sure your GO PATH directory structure looks like this:
+
+- ├───bin
+- ├───pkg
+- └───src
+- └───github.com
+- -        └───"YourGithubUsername"
+- -            └───BackendFolder  (Should include main.go and data.db)
+
+
+Before starting up the backend make sure you have installed:
+"jwt-go"," handlers", "mux" and "go-sqlite3". 
+Install them by typing:
+```
+go get github.com/dgrijalva/jwt-go
+go get github.com/gorilla/handlers
+go get github.com/gorilla/mux
+go get github.com/mattn/go-sqlite3
+
+```
+After all installed use ```go run main.go``` in BackendFolder to start the backend at port :8081.
+### Vue JS FrontEnd
+[NodeJs](https://nodejs.org/en/ "NodeJs") should be present in your system. Also you need Vue in order to run the frontend.
+
+`npm install -g @vue/cli`
+
+Before starting the frontend, following dependencies must be installed: vue-router and axios.
+```
+npm install vue-router
+npm install axios
+```
+After install is completed use `npm run serve` from root of the frontend.
