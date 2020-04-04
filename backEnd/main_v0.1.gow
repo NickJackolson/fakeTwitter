@@ -1,0 +1,190 @@
+package main
+
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"log"
+	"math/rand"
+	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
+)
+
+// User is a model
+type User struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// Article is a model for articles which will be used in website
+// it contains ID, title, description, content, post_time and user_info
+type Article struct {
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Desc    string `json:"desc"`
+	Content string `json:"content"`
+	Ptime   string `json:"ptime"`
+	User    *User  `json:"user"`
+}
+
+// rows, _ := database.Query("SELECT id, firstname, lastname FROM people")
+// var id int
+// var firstname string
+// var lastname string
+// for rows.Next() {
+// 	rows.Scan(&id, &firstname, &lastname)
+// 	fmt.Println(strconv.Itoa(id) + ": " + firstname + " " + lastname)
+
+// Articles as slice initialized here
+var Articles []Article
+
+// Users as slice initialized here
+var Users []User
+
+func homePage(w http.ResponseWriter, r *http.Request) {
+	var message = "<h1>Home Page of Mete App</h1>"
+	fmt.Fprintf(w, message)
+}
+
+func loginPage(w http.ResponseWriter, r *http.Request) {
+	var message = "<h1>Login to Mete App</h1>"
+	fmt.Fprintf(w, message)
+}
+
+func getAllArticles(w http.ResponseWriter, r *http.Request) {
+	//var message = "All Articles of Mete App\n"
+	//fmt.Fprintf(w, message)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(Articles)
+}
+
+func getAllArticlesDB(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var instance Article
+	database, _ := sql.Open("sqlite3", "./data.db")
+	rows, _ := database.Query("SELECT * FROM article")
+	for rows.Next() {
+		rows.Scan(&instance.ID, &instance.Title, &instance.Desc, &instance.Content, &instance.Ptime)
+		json.NewEncoder(w).Encode(instance)
+	}
+}
+
+func getArticle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r) // get any params
+
+	for _, item := range Articles {
+		if item.ID == params["id"] {
+			json.NewEncoder(w).Encode(item)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(&Article{}) // return empty article if ID does not exist
+}
+
+func updateArticle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var article Article
+	_ = json.NewDecoder(r.Body).Decode(&article)
+	params := mux.Vars(r) // get any params
+	article.ID = params["id"]
+	for index, item := range Articles {
+		if item.ID == params["id"] {
+			Articles[index] = article
+			break
+		}
+	}
+}
+
+func deleteArticle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r) // get any params
+	for index, item := range Articles {
+		if item.ID == params["id"] {
+			Articles = append(Articles[:index], Articles[index+1:]...)
+			break
+		}
+	}
+}
+
+func postArticle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var article Article
+	_ = json.NewDecoder(r.Body).Decode(&article)
+	if article.Content == "" {
+		var message = "Error! No content given for new post"
+		fmt.Fprintf(w, message)
+		return
+	}
+	article.ID = strconv.Itoa(rand.Intn(10000000))
+	Articles = append(Articles, article)
+}
+
+func createDB(userList []User, articleList []Article) {
+	// check if database exists else create and fill!
+	database, _ := sql.Open("sqlite3", "./data.db")
+	_, err := database.Query("SELECT * FROM article")
+	if err != nil {
+		fmt.Println("Creating DB")
+		statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS user (id INTEGER PRIMARY KEY, username TEXT, password TEXT)")
+		if err != nil {
+			fmt.Println("Error at user creation")
+			return
+		}
+		statement.Exec()
+		statement, _ = database.Prepare("INSERT INTO user (username, password) VALUES (?, ?)")
+		for _, user := range userList {
+			statement.Exec(user.Username, user.Password)
+		}
+
+		statement, err = database.Prepare("CREATE TABLE IF NOT EXISTS article (id INTEGER PRIMARY KEY, title TEXT, desc TEXT, content TEXT, ptime TEXT, userID INTEGER )")
+		if err != nil {
+			fmt.Println("Error2 at article creation")
+			return
+		}
+		statement.Exec()
+		statement, _ = database.Prepare("INSERT INTO article (title, desc, content, ptime, userID) VALUES (?, ?, ?, ?, ?)")
+		for _, article := range articleList {
+			userID, _ := strconv.Atoi(article.User.ID)
+			statement.Exec(article.Title, article.Desc, article.Content, article.Ptime, userID)
+			fmt.Println(article.Title, article.Desc, article.Content, article.Ptime, userID)
+		}
+	}
+}
+
+func handleRequests() {
+
+	myRouter := mux.NewRouter()
+
+	// mock data
+	Users = append(Users, User{ID: "1", Username: "Mete", Password: "12345"},
+		User{ID: "2", Username: "Mehmet", Password: "Gweaqw5s"},
+		User{ID: "3", Username: "Rıza", Password: "Y(gn38asf"},
+	)
+
+	Articles = append(Articles,
+		Article{ID: "1", Title: "Article1", Desc: "Test", Content: "Hello World", Ptime: "12-01-2020", User: &Users[0]},
+		Article{ID: "2", Title: "Article2", Desc: "Test", Content: "Hello to Mete App", Ptime: "20-01-2020", User: &Users[1]},
+		Article{ID: "3", Title: "Article3", Desc: "Test", Content: "Hello Kartaca", Ptime: "25-01-2020", User: &Users[2]},
+	)
+
+	//send data to db
+	createDB(Users, Articles)
+
+	myRouter.HandleFunc("/", homePage).Methods("GET")
+	myRouter.HandleFunc("/login", loginPage).Methods("GET")
+	myRouter.HandleFunc("/articles", getAllArticlesDB).Methods("GET")
+	myRouter.HandleFunc("/articles", postArticle).Methods("POST")
+	myRouter.HandleFunc("/articles/{id}", getArticle).Methods("GET")
+	myRouter.HandleFunc("/articles/{id}", updateArticle).Methods("PUT")
+	myRouter.HandleFunc("/articles/{id}", deleteArticle).Methods("DELETE")
+	log.Fatal(http.ListenAndServe(":8081", myRouter))
+}
+
+func main() {
+	handleRequests()
+}
