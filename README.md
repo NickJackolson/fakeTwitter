@@ -43,3 +43,21 @@ npm install vue-router
 npm install axios
 ```
 After install is completed use `npm run serve` from root of the frontend.
+
+## How to run On Docker
+### BackEnd
+Change to backend directory.
+First build the docker image by using docker command: 
+```docker build -t go-app . ```
+then use:
+```docker run -it -p 8081:8081``` 
+Go api will be ready at 8081
+
+### FrontEnd
+Change to frontend directory.
+First build the frontend's docker image by typing
+``` docker build -t dockerized-vuejs ```
+
+then use 
+```docker run -it -p 8080:8080``` 
+in frontEnd directory. While it runs the app will be ready at localhost:8080
